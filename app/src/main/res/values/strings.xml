@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">Поздравь!</string>
+
+    <!--Экран приветствия-->
+    <string name="hello_text">Привет, друг!</string>
+    <string name="welcome_description">Полагаю, у кого-то из твоих близких важный день и ты хочешь выбрать поздравление? Здорово, что ты обратился ко мне, я тебе помогу!*</string>
+    <string name="tester_star">*А может быть ты просто решил протестировать приложение? В любом случае - Welcome!</string>
+    <string name="start_btn">Начнём!</string>
+    <string name="app_theme_title">Цвет оформления:</string>
+    <string name="green_theme_title">Колумбийская зелень</string>
+    <string name="purple_theme_title">Лавандовое поле</string>
+
+    <!--Экран настройки генератора-->
+    <string name="config_title">Мастрер настройки поздравления</string>
+    <string name="person_name">Имя</string>
+    <string name="person_name_title">Кого хотите поздравить?</string>
+    <string name="person_name_description">Например \"Мама\" или \"Олег\"</string>
+    <string name="male_gender_title">М</string>
+    <string name="female_gender_title">Ж</string>
+    <string name="person_gender">Пол человека, которого хотите поздравить</string>
+    <string name="non_officially_title">Обращение  на ты</string>
+    <string name="officially_title">на Вы</string>
+    <string name="from_me_title">Поздравление  от меня</string>
+    <string name="from_we_title">от нас</string>
+    <string name="is_closed_one_title">Родной человек</string>
+    <string name="congratulation_length_title">Длина поздравления</string>
+    <string name="humor_degree_title">Юмористичность поздравления</string>
+    <string name="reason_description">Выберите повод</string>
+    <string name="need_more_settings_title">Хочу больше настроек</string>
+    <string name="start_generate_btn">Поехали</string>
+
+    <!--Праздники-->
+    <string name="birthday">День рождения</string>
+    <string name="wedding_anniversary">Годовщина свадьбы</string>
+    <string name="new_year">Новый год</string>
+    <string name="mothers_day">День матери</string>
+    <string name="fathers_day">День отца</string>
+    <string name="female_day">8 марта</string>
+    <string name="male_day">23 февраля</string>
+    <string name="independence_day">День независимости</string>
+    <string name="undefined">Впишу сам</string>
+    <string name="not_chosen">Не выбрано</string>
+
+    <!--Экран поздравления-->
+    <string name="congratulation_title">Поздравление готово</string>
+    <string name="generated_congratulation_title">Поздравление</string>
+    <string name="once_more_title">Ещё раз</string>
+    <string name="send_title">Отправить</string>
+    <string name="copy_title">Скопировать</string>
+
+</resources>
