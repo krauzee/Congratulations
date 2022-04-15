@@ -24,7 +24,7 @@ import ru.krauzze.generatecongratulation.ui.theme.GenerateCongratulationTheme
 @Composable
 fun ShowCongratulation(congratulation: String) {
     BaseColumnFullScreen {
-        Toolbar(text = R.string.congratulation_title, needBackBtn = true)
+        Toolbar(text = R.string.congratulation_title, needBackBtn = true, null)
         Column(
             modifier = Modifier
                 .fillMaxHeight()

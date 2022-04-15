@@ -27,7 +27,7 @@ import ru.krauzze.generatecongratulation.ui.viewModel
 
 @ExperimentalAnimationApi
 @Composable
-fun Toolbar(@StringRes text: Int, needBackBtn: Boolean) {
+fun Toolbar(@StringRes text: Int, needBackBtn: Boolean, endButton: ToolbarEndButton?) {
     Row(
         Modifier
             .padding()
@@ -52,9 +52,26 @@ fun Toolbar(@StringRes text: Int, needBackBtn: Boolean) {
         }
         ToolbarText(
             text = stringResource(id = text),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
+        AnimatedVisibility(visible = endButton != null) {
+            endButton?.let {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_settings),
+                    contentDescription = "Toolbar end button",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colors.background),
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+                                endButton.action.invoke()
+                            }
+                        )
+                )
+            }
+        }
     }
 }
 
@@ -68,9 +85,17 @@ private fun Preview() {
             Box(Modifier.fillMaxSize()) {
                 Toolbar(
                     text = R.string.congratulation_title,
-                    false
+                    true,
+                    ToolbarEndButton(
+                        R.drawable.ic_settings
+                    ) { }
                 )
             }
         }
     }
 }
+
+data class ToolbarEndButton(
+    val image: Int,
+    val action: () -> Unit
+)

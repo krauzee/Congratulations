@@ -1,11 +1,13 @@
 package ru.krauzze.generatecongratulation.ui
 
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.launch
 import ru.krauzze.generatecongratulation.data.Configuration
 import ru.krauzze.generatecongratulation.data.Gender
 import ru.krauzze.generatecongratulation.data.Reason
 import ru.krauzze.generatecongratulation.generator.CongratulationsGenerator
 import ru.krauzze.generatecongratulation.generator.SexDefine
+import ru.krauzze.generatecongratulation.repositories.DesiresRepository
 import ru.krauzze.generatecongratulation.ui.Screen.*
 import ru.krauzze.generatecongratulation.ui.base.BaseViewModel
 import ru.krauzze.generatecongratulation.util.DataStore
@@ -17,7 +19,9 @@ import kotlin.random.Random
  * устанавливает [ScreenState] который будет отображен в активити и собирает
  * [Configuration], на основе которого будет сгенерировано поздравление
  */
-class MainViewModel @Inject constructor() : BaseViewModel() {
+class MainViewModel @Inject constructor(
+    private val desiresRepository: DesiresRepository
+) : BaseViewModel() {
 
     private var themeWasApplyNeedRecreate = MutableLiveData(false)
 
@@ -34,7 +38,7 @@ class MainViewModel @Inject constructor() : BaseViewModel() {
     fun getScreenState() = screenState
 
     fun changeTheme(isGreen: Boolean) {
-        DataStore.Theme.themeColorIsGreen = isGreen
+        DataStore.AppConfig.themeColorIsGreen = isGreen
         screenState.postValue(
             screenState.value?.copy(themeIsGreen = isGreen)
         )
@@ -51,14 +55,23 @@ class MainViewModel @Inject constructor() : BaseViewModel() {
      * Срабатывает после того как был показан экран [Screen.SPLASH]
      */
     fun onSplashDone() {
-        screenState.postValue(screenState.value?.copy(activeScreen = GREETING))
+        val activeScreen = if (!DataStore.AppConfig.isGreetingShown) GREETING else CONFIGURATION
+        screenState.postValue(screenState.value?.copy(activeScreen = activeScreen))
     }
 
     /**
      * Срабатывает по нажатию на кнопку "Начнем" на экране [Screen.GREETING]
      */
     fun onStartClick() {
+        DataStore.AppConfig.isGreetingShown = true
         screenState.postValue(screenState.value?.copy(activeScreen = CONFIGURATION))
+    }
+
+    /**
+     * Срабатывает по нажатию на кнопку "Настройки" в тулбаре на экране [Screen.CONFIGURATION]
+     */
+    fun onSettingsClick() {
+        screenState.postValue(screenState.value?.copy(activeScreen = SETTINGS))
     }
 
     /**
@@ -129,8 +142,9 @@ class MainViewModel @Inject constructor() : BaseViewModel() {
      * @param value - значение от 0 до n, возможные значения - [C_RANGE_STEPS_COUNT]
      */
     fun onLengthDegreeChange(value: Int) {
-        userConfiguration.postValue(userConfiguration.value?.copy(lengthDegree = value))
-        postChangedConfiguration(userConfiguration.value?.copy(lengthDegree = value))
+        val length = value * 25
+        userConfiguration.postValue(userConfiguration.value?.copy(lengthDegree = length))
+        postChangedConfiguration(userConfiguration.value?.copy(lengthDegree = length))
     }
 
     /**
@@ -150,9 +164,37 @@ class MainViewModel @Inject constructor() : BaseViewModel() {
      * берет [Configuration] из userConfiguration
      */
     fun onStartGenerateBtnClick(isRestart: Boolean) {
+        postProgressScreen()
         if (isRestart)
-            userConfiguration.postValue(userConfiguration.value?.copy(lengthDegree = Random.nextInt(0, 4)))
-        congratulation = CongratulationsGenerator.generateCongratulation(userConfiguration.value)
+            userConfiguration.postValue(userConfiguration.value?.copy(lengthDegree = (Random.nextInt(0, 4) * 25)))
+
+        var remoteDesires = ""
+        launch {
+            kotlin.runCatching {
+                remoteDesires = desiresRepository.getBirthdayDesires(
+                    userConfiguration.value?.reason?: Reason.NOT_CHOSEN,
+                    userConfiguration.value?.lengthDegree ?: 50
+                )
+                congratulation = CongratulationsGenerator.generateCongratulation(
+                    userConfiguration.value,
+                    remoteDesires
+                )
+                postCongratulationScreen(congratulation)
+            }.onFailure {
+                it.printStackTrace()
+                congratulation = CongratulationsGenerator.generateCongratulation(
+                    userConfiguration.value,
+                    remoteDesires
+                )
+                postCongratulationScreen(congratulation)
+            }
+        }
+    }
+
+    /**
+     * Функция отвечает за отправку стейта отображения готового поздравления
+     */
+    private fun postCongratulationScreen(congratulation: String) {
         screenState.postValue(
             screenState.value?.copy(
                 activeScreen = CONGRATULATION,
@@ -163,35 +205,36 @@ class MainViewModel @Inject constructor() : BaseViewModel() {
     }
 
     /**
+     * Функция отвечает за отправку стейта отображения процесса загрузки
+     */
+    private fun postProgressScreen() {
+        screenState.postValue(
+            screenState.value?.copy(activeScreen = PROGRESS)
+        )
+    }
+
+    /**
      * Отвечает за сохранение сгенерированного поздравления, КОТОРОЕ ОТРЕДАКТИРОВАЛ ПОЛЬЗОВАТЕЛЬ
      */
     fun setCongratulation(redactCongratulation: String) {
         congratulation = redactCongratulation
-        screenState.postValue(
-            screenState.value?.copy(
-                activeScreen = CONGRATULATION,
-                configuration = userConfiguration.value ?: Configuration(),
-                congratulation = redactCongratulation
-            )
-        )
+        postCongratulationScreen(redactCongratulation)
     }
 
     /**
      * Срабатывает по нажатию кнопки "Скопировать"
      */
     fun copyCongratulation() = copyCongratulationState.postValue(congratulation)
-
     fun getCopiedCongratulation() = copyCongratulationState
 
     /**
      * Срабатывает по нажатию кнопки "Отправить"
      */
     fun sendCongratulation() = sendCongratulationState.postValue(congratulation)
-
     fun getSendCongratulation() = sendCongratulationState
 
     fun onBackPressed() {
-        if (screenState.value?.activeScreen == CONGRATULATION)
+        if (screenState.value?.activeScreen == CONGRATULATION || screenState.value?.activeScreen == SETTINGS)
             screenState.postValue(
                 ScreenState(
                     activeScreen = CONFIGURATION,
@@ -211,7 +254,7 @@ data class ScreenState(
     val configuration: Configuration = Configuration(),
     val needMoreSettings: Boolean = false,
     val congratulation: String = "",
-    val themeIsGreen: Boolean = DataStore.Theme.themeColorIsGreen
+    val themeIsGreen: Boolean = DataStore.AppConfig.themeColorIsGreen
 )
 
 /**
@@ -220,7 +263,9 @@ data class ScreenState(
  * [GREETING] - экран приветствия и описания
  * [CONFIGURATION] - экран настройки генератора поздравлений
  * [CONGRATULATION] - экран сгенерированного поздравления (с него можно вернуться на [CONFIGURATION])
+ * [CONFIGURATION] - экран индикации прогресса
+ * [CONFIGURATION] - экран настроек
  */
 enum class Screen {
-    SPLASH, GREETING, CONFIGURATION, CONGRATULATION
+    SPLASH, GREETING, CONFIGURATION, CONGRATULATION, PROGRESS, SETTINGS
 }

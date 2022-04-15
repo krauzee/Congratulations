@@ -103,7 +103,8 @@ fun <T> Bundle.put(key: String, value: T) {
 
 fun <T : Any> argument(): ReadWriteProperty<Fragment, T> = FragmentArgumentDelegate()
 
-fun <T : Any> argumentNullable(): ReadWriteProperty<Fragment, T?> = FragmentNullableArgumentDelegate()
+fun <T : Any> argumentNullable(): ReadWriteProperty<Fragment, T?> =
+    FragmentNullableArgumentDelegate()
 
 fun Activity.showKeyboard(view: View?) {
     view?.let {
@@ -164,7 +165,10 @@ fun Activity.hideKeyboard() {
 //}
 
 fun postDelayed(action: () -> Unit, time: Long) {
-    Handler(Looper.myLooper() ?: throw Exception("Looper must not be null")).postDelayed(action, time)
+    Handler(Looper.myLooper() ?: throw Exception("Looper must not be null")).postDelayed(
+        action,
+        time
+    )
 }
 
 fun <A, B> Map<A, B>.getIfExist(key: A, defaultValue: B? = null): B? {
@@ -213,5 +217,33 @@ fun Color.darkenColor(value: Float = 0.3f): Color {
             }
         )
     )
+}
+
+fun String.replaceSupportCase(oldValue: String, newVal: String): String {
+    run {
+        var newValue = newVal
+        var occurrenceIndex: Int = indexOf(oldValue, 0)
+        // FAST PATH: no match
+        if (occurrenceIndex < 0) {
+            occurrenceIndex = indexOf(oldValue.replaceFirstChar { it.uppercase() }, 0)
+            newValue = newValue.replaceFirstChar { it.uppercase() }
+        }
+        if (occurrenceIndex < 0) return this
+
+        val oldValueLength = oldValue.length
+        val searchStep = oldValueLength.coerceAtLeast(1)
+        val newLengthHint = length - oldValueLength + newValue.length
+        if (newLengthHint < 0) throw OutOfMemoryError()
+        val stringBuilder = StringBuilder(newLengthHint)
+
+        var i = 0
+        do {
+            stringBuilder.append(this, i, occurrenceIndex).append(newValue)
+            i = occurrenceIndex + oldValueLength
+            if (occurrenceIndex >= length) break
+            occurrenceIndex = indexOf(oldValue, occurrenceIndex + searchStep)
+        } while (occurrenceIndex > 0)
+        return stringBuilder.append(this, i, length).toString()
+    }
 }
 

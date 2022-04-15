@@ -48,4 +48,7 @@
     <string name="send_title">Отправить</string>
     <string name="copy_title">Скопировать</string>
 
+    <!--Остальное-->
+    <string name="settings_title">Настройки</string>
+
 </resources>

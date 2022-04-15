@@ -6,6 +6,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import ru.krauzze.generatecongratulation.util.DataStore
 
 private val DarkColorPalette = darkColors(
     primary = Primary_dark_theme,
@@ -69,8 +70,8 @@ fun greenIndicatorColor(): Color {
 @Composable
 fun GenerateCongratulationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    //themeColorSiGreen: Boolean = DataStore.Theme.themeColorIsGreen,
-    themeColorSiGreen: Boolean = false,
+    themeColorSiGreen: Boolean = DataStore.AppConfig.themeColorIsGreen,
+    //themeColorSiGreen: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {

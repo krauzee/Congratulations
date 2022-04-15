@@ -16,7 +16,6 @@ class RetrofitProvider @Inject constructor(private val client: OkHttpClient) : P
             .baseUrl(BuildConfig.SERVER_URL)
             .client(client)
             .addConverterFactory(
-                // 2019-02-10 18:33:26
                 GsonConverterFactory.create(
                     GsonBuilder()
                         .setLenient()

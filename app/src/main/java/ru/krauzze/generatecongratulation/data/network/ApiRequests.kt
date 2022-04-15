@@ -5,6 +5,9 @@ import ru.krauzze.generatecongratulation.data.network.pojo.response.DesiresRespo
 
 interface ApiRequests {
 
-    @GET("list")
-    suspend fun getDesires(): DesiresResponse
+    @GET("birthday")
+    suspend fun getBirthdayDesires(): DesiresResponse
+
+    @GET("random")
+    suspend fun getRandomDesires(): DesiresResponse
 }

@@ -9,7 +9,7 @@ import ru.krauzze.generatecongratulation.R
  * @param gender - пол поздравляемого человека, Вычисляется автоматически, но можно скорректировать вручную
  * @param closedOne - флаг, который указывает, является ли человек близким
  * @param isOfficial - тогл официального поздравления, влияет на то какие местоимения будут использоваться ТЫ/ВЫ
- * @param lengthDegree - длина пожеланий, в зависимости от выбранного
+ * @param lengthDegree - длина пожеланий, в зависимости от выбранной позиции слайдера 0-100 с шагом 25
  * @param isFromWe - флаг, который указывает, как будет выражено поздравление, от "меня" или от "нас", например "желаю" или "желаем"
  *
 // * @param salutation - обращение к человеку, например "дорогой ДРУГ" или "любимая МАМА", здесь друг и мама являются salutation
@@ -23,7 +23,7 @@ data class Configuration(
     val gender: Gender = Gender.UNDEFINED,
     val closedOne: Boolean = false,
     val isOfficial: Boolean = false,
-    val lengthDegree: Int = 2,
+    val lengthDegree: Int = 50,
     val isFromWe: Boolean = false,
 
 

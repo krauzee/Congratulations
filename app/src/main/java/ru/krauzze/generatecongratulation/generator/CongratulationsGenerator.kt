@@ -3,6 +3,7 @@ package ru.krauzze.generatecongratulation.generator
 import ru.krauzze.generatecongratulation.data.Configuration
 import ru.krauzze.generatecongratulation.data.Gender
 import ru.krauzze.generatecongratulation.data.Reason
+import ru.krauzze.generatecongratulation.util.replaceSupportCase
 import kotlin.random.Random
 
 /**
@@ -11,12 +12,15 @@ import kotlin.random.Random
 object CongratulationsGenerator {
 
     private var configuration = Configuration()
+    private var desires = ""
 
     /**
      * Функция, которая отвечает за текст поздравления, средством вызова других функций
      * в зависимости от пришедшей конфигурации [Configuration]
      */
-    fun generateCongratulation(config: Configuration?): String {
+    fun generateCongratulation(config: Configuration?, remoteDesires: String): String {
+        if (remoteDesires.isNotEmpty())
+            desires = remoteDesires
         this.configuration = config ?: Configuration()
         val congratulation = StringBuilder()
         when {
@@ -27,7 +31,7 @@ object CongratulationsGenerator {
                 .append(generateOnlyReason())
             else -> congratulation.append(generateRandomCongratulation())
         }
-        return congratulation.toString()
+        return congratulation.toString().replacePronouns().replaceVerbs()
     }
 
     /**
@@ -44,8 +48,6 @@ object CongratulationsGenerator {
             .append(getReason())
             .append("! ")
             .append(getDesireByPlural().replaceFirstChar { it.uppercase() })
-            .append(" ")
-            .append(getPronoun(Case.GIVES))
             .append(" ")
             .append(getDesiresByReason())
             .toString()
@@ -149,6 +151,60 @@ object CongratulationsGenerator {
     }
 
     /**
+     * Функция, которая меняет местоимение (например Ты на Вы и наоборот) в зависимости официальности поздравления @see [Configuration.isOfficial]
+     */
+    private fun String.replacePronouns(): String {
+        return if (configuration.isOfficial)
+            this.replace(" ты", " Вы")
+                .replace("Ты", "Вы")
+                .replace("тебе", "Вам")
+                .replace("тебя", "Вас")
+                .replace("о тебе", "о Вас")
+                .replace("твоей", "Вашей")
+                .replace("тобой", "Вами")
+        else
+            this.replace("Вы", "ты")
+                .replace("Вам", "тебе")
+                .replace("Вас", "тебя")
+                .replace("о Вас", "о тебе")
+                .replace("Вашей", "твоей")
+                .replace("Вами", "тобой")
+    }
+    
+    /**
+     * Функция, которая меняет глаголы (например Пой на Пойте и наоборот) в зависимости официальности поздравления @see [Configuration.isOfficial]
+     */
+    private fun String.replaceVerbs(): String {
+        return if (configuration.isOfficial)
+            this.replaceSupportCase("пой", "пойте")
+                .replaceSupportCase("цвети", "цветите")
+                .replaceSupportCase("кайфуй", "кайфуйте")
+                .replaceSupportCase("люби", "любите")
+                .replaceSupportCase("наполняй", "наполняйте")
+        else
+            this.replaceSupportCase("пойте", "пой")
+                .replaceSupportCase("цветите", "цвети")
+                .replaceSupportCase("кайфуйте", "кайфуй")
+                .replaceSupportCase("любите", "люби")
+                .replaceSupportCase("наполняйте", "наполняй")
+//        return if (configuration.isOfficial)
+//            this.replace("пой", "пойте")
+//                .replace("Пой", "Пойте")
+//                .replace("цвети", "цветите")
+//                .replace("Цвети", "Цветите")
+//                .replace("кайфуй", "кайфуйте")
+//                .replace("Кайфуй", "Кайфуйте")
+//                .replace("люби", "люби")
+//                .replace("Люби", "Кайфуйте")
+//        else
+//            this.replace("Вы", "ты")
+//                .replace("Вам", "тебе")
+//                .replace("Вас", "тебя")
+//                .replace("о Вас", "о тебе")
+//                .replace("Вашей", "твоей")
+    }
+
+    /**
      * Функция, которая возвращает глагол поздравляю в зависимости от число(множественное или единственное) @see [Configuration.isFromWe]
      */
     private fun getCongratulationVerbByPlural(): String {
@@ -197,7 +253,7 @@ object CongratulationsGenerator {
      * Функция, которая генерирует пожелания в зависимости от выбранного повода
      */
     private fun getDesiresByReason(): String {
-        return when (configuration.reason) {
+        return if (desires.isEmpty()) when (configuration.reason) {
             Reason.BIRTHDAY -> getDesiresByLengthForTenSizeList(birthdayDesiresList)
             Reason.WEDDING_ANNIVERSARY -> getDesiresByLength(anniversaryDesiresList)
             Reason.NEW_YEAR -> getDesiresByLength(newYearDesiresList)
@@ -208,7 +264,7 @@ object CongratulationsGenerator {
             Reason.INDEPENDENCE_DAY -> INDEPENDENCE_DESIRES
             Reason.UNDEFINED -> "(ПОВОД)"
             Reason.NOT_CHOSEN -> ""
-        }
+        } else desires
     }
 
     /**
@@ -239,7 +295,9 @@ object CongratulationsGenerator {
     )
 
     private fun getRandomDesire(): String {
-        return getDesiresByLengthForTenSizeList(randomDesiresList)
+        return if (desires.isEmpty())
+            getDesiresByLengthForTenSizeList(randomDesiresList)
+        else desires
     }
 
     /**
@@ -343,9 +401,9 @@ object CongratulationsGenerator {
     private fun getDesiresByLength(targetDesiresList: List<String>): String {
         return when (configuration.lengthDegree) {
             0 -> targetDesiresList[0]
-            1 -> targetDesiresList[1]
-            3 -> targetDesiresList[3]
-            4 -> targetDesiresList[4]
+            25 -> targetDesiresList[1]
+            75 -> targetDesiresList[3]
+            100 -> targetDesiresList[4]
             else -> targetDesiresList[Random.nextInt(2, 3)]
         }
     }
@@ -353,9 +411,9 @@ object CongratulationsGenerator {
     private fun getDesiresByLengthForTenSizeList(targetDesiresList: List<String>): String {
         return when (configuration.lengthDegree) {
             0 -> targetDesiresList[Random.nextInt(0, 1)]
-            1 -> targetDesiresList[Random.nextInt(2, 3)]
-            3 -> targetDesiresList[Random.nextInt(6, 7)]
-            4 -> targetDesiresList[Random.nextInt(8, 9)]
+            25 -> targetDesiresList[Random.nextInt(2, 3)]
+            75 -> targetDesiresList[Random.nextInt(6, 7)]
+            100 -> targetDesiresList[Random.nextInt(8, 9)]
             else -> targetDesiresList[Random.nextInt(3, 7)]
         }
     }

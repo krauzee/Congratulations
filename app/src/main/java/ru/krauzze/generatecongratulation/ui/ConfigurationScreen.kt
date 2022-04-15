@@ -29,6 +29,7 @@ import ru.krauzze.generatecongratulation.compose.text.FieldNameText
 import ru.krauzze.generatecongratulation.compose.text.SecondaryDescriptionText
 import ru.krauzze.generatecongratulation.compose.text.SecondaryHeadingText
 import ru.krauzze.generatecongratulation.compose.uielements.Toolbar
+import ru.krauzze.generatecongratulation.compose.uielements.ToolbarEndButton
 import ru.krauzze.generatecongratulation.data.*
 import ru.krauzze.generatecongratulation.data.Reason.*
 import ru.krauzze.generatecongratulation.ui.theme.GenerateCongratulationTheme
@@ -41,7 +42,13 @@ import ru.krauzze.generatecongratulation.ui.theme.GenerateCongratulationTheme
 fun ShowConfiguration(visibility: Boolean, config: Configuration, isNeedMoreSettings: Boolean) {
     AnimatedVisibility(visible = visibility) {
         BaseColumnFullScreen {
-            Toolbar(text = R.string.config_title, needBackBtn = false)
+            Toolbar(
+                text = R.string.config_title,
+                needBackBtn = false,
+                ToolbarEndButton(R.drawable.ic_settings) {
+                    viewModel.onSettingsClick()
+                }
+            )
             Column(
                 modifier = Modifier
                     .fillMaxHeight()

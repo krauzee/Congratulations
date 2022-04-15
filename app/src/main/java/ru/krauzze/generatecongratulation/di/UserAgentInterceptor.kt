@@ -11,9 +11,7 @@ class UserAgentInterceptor : Interceptor {
         private const val USER_AGENT = "User-Agent"
     }
 
-    private val userAgent: String =
-            "Rento Android " + "${BuildConfig.VERSION_NAME} "
-
+    private val userAgent: String = "GenerateCongratulation Android: v" + BuildConfig.VERSION_NAME
 
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {

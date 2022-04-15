@@ -11,8 +11,8 @@ object DataStore {
     @Inject
     lateinit var pref: SharedPreferences
 
-    object Theme {
+    object AppConfig {
         var themeColorIsGreen by pref.boolean(def = true)
+        var isGreetingShown by pref.boolean(def = false)
     }
-
 }
